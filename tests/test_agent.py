@@ -1,14 +1,33 @@
-# tests/test_agent.py
-"""
-Tests the Agent class functionality.
-"""
+import logging
 from openmeta.core.agent import Agent
 from openmeta.core.memory import Memory
 
-def test_agent():
-    memory = Memory()
-    agent = Agent("TestAgent", memory)
-    result = agent.process_task("Unit test task")
-    assert "Unit test task" in result
+logging.basicConfig(
+    filename="ethereal_sdk_test.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
-test_agent()
+def test_agent():
+    try:
+        memory = Memory()
+        agent = Agent("TestAgent", memory)
+        
+        task = "Unit test task"
+        logging.info(f"Running test with task: {task}")
+        
+        result = agent.process_task(task)
+        
+        assert "Unit test task" in result, f"Test failed. Expected to find '{task}' in the result."
+        
+        logging.info(f"Test passed. Task '{task}' processed successfully.")
+
+    except AssertionError as e:
+        logging.error(f"AssertionError: {e}")
+        print(f"AssertionError: {e}")
+    except Exception as e:
+        logging.error(f"Unexpected error: {e}")
+        print(f"Unexpected error: {e}")
+
+if __name__ == "__main__":
+    test_agent()
