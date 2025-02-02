@@ -1,60 +1,50 @@
 import logging
-import re
-from typing import Union
+from typing import Dict, Any
 from openmeta.core.agent_customization import AgentCustomization  # Import the customization class
+from openmeta.core.task_queue import TaskQueue, TaskQueueError  # Import your task queue system and custom error
 
 # Configure logging system
-logging.basicConfig(
-    filename="ethereal_sdk.log",
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO)
 
 class Agent:
-    def __init__(self, name: str, memory, customization: AgentCustomization = None):
-        """
-        Initializes an agent with a name, memory, and optional customization.
-
-        :param name: The name of the agent
-        :param memory: The memory object where agent data will be stored
-        :param customization: The customization object for adjusting agent behavior (optional)
-        """
-        if not isinstance(name, str) or not name.strip():
-            raise ValueError("Agent name must be a non-empty string.")
-        
+    def __init__(self, name: str):
         self.name = name
-        self.memory = memory
-        self.customization = customization  # Support for customization functionality
+        self.task_queue = TaskQueue()  # Initialize TaskQueue
+        self.customization = AgentCustomization(self)
 
-        logging.info(f"Agent '{self.name}' initialized.")
-
-    def process_task(self, task: Union[str, None]) -> str:
-        """Processes a task, applies customizations, and stores it in memory."""
-        
-        # Validate task input
-        if not isinstance(task, str) or not re.match(r"^[a-zA-Z0-9\s]+$", task):
-            logging.error("Invalid task format received.")
-            raise ValueError("Task must be a non-empty string containing only letters, numbers, and spaces.")
-        
-        # Apply customizations if provided
-        if self.customization:
-            try:
-                customizations = self.customization.get_current_customizations(self.name)
-                logging.info(f"Using customizations: {customizations}")
-                # Example: Adjust task processing based on customization
-                task_priority = customizations.get("task_priority", "normal")
-                logging.info(f"Task priority set to: {task_priority}")
-            except KeyError:
-                logging.info(f"No customizations found for agent {self.name}")
-
+    def add_task(self, task: Dict[str, Any]):
+        """Add a new task to the task queue with validation and error handling."""
         try:
-            # Process the task
-            result = f"Processing task: {task}"
-            self.memory.store(result)
-            
-            logging.info(f"Task processed successfully: {task}")
-            return result
+            # Validate task data
+            if not self._validate_task(task):
+                raise ValueError("Invalid task data. Task is missing required fields.")
+
+            logging.info(f"Adding task {task.get('id')} to queue")
+            self.task_queue.add_to_queue(task)  # Add task to the queue
+
+        except ValueError as e:
+            logging.error(f"Task validation failed: {e}")
+        except TaskQueueError as e:
+            logging.error(f"Failed to add task to queue: {e}")
         except Exception as e:
-            # Log error
-            logging.error(f"Error processing task '{task}': {e}")
-            raise RuntimeError(f"Failed to process task: {e}")
+            logging.error(f"Unexpected error while adding task: {e}")
+
+    def process_tasks(self):
+        """Process tasks from the queue asynchronously."""
+        try:
+            logging.info("Starting to process tasks...")
+            self.task_queue.process_queue()  # Process the queue
+            logging.info("Task processing complete.")
+        except TaskQueueError as e:
+            logging.error(f"Error processing tasks: {e}")
+        except Exception as e:
+            logging.error(f"Unexpected error during task processing: {e}")
+
+    def _validate_task(self, task: Dict[str, Any]) -> bool:
+        """Validate the structure and content of a task."""
+        required_fields = ['id', 'priority', 'task_type']
+        for field in required_fields:
+            if field not in task:
+                logging.warning(f"Missing required field: {field}")
+                return False
+        return True
