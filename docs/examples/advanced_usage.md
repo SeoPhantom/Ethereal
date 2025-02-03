@@ -8,7 +8,8 @@ Welcome to the **Advanced Usage** guide for Ethereal SDK! 🚀 This guide will h
 1. [Customizing Agent Memory](#customizing-agent-memory)
 2. [Creating Dynamic Workflows](#creating-dynamic-workflows)
 3. [Real-Time API Integrations](#real-time-api-integrations)
-4. [Enhancing Performance](#enhancing-performance)
+4. [Task Queue and Execution](#task-queue-and-execution)
+5. [Enhancing Performance](#enhancing-performance)
 
 ---
 
@@ -76,8 +77,35 @@ print(data)
 
 ---
 
+## 📌 Task Queue and Execution
+Efficient task management is crucial for AI-driven applications. The `TaskQueue` module provides structured task handling with priority-based execution.
+
+### 🔹 Example: Using TaskQueue for Prioritized Processing
+```python
+from openmeta.core.task_queue import TaskQueue
+
+task_queue = TaskQueue()
+
+task1 = {"id": 1, "priority": 2, "task_type": "analysis"}
+task2 = {"id": 2, "priority": 1, "task_type": "data_cleaning"}
+
+task_queue.add_to_queue(task1)
+task_queue.add_to_queue(task2)
+task_queue.process_queue()
+```
+💡 **Use case:** Manage and execute tasks based on priority.
+
+### 🔹 Example: Task Execution Mechanism
+```python
+def execute_task(task: dict):
+    print(f"Executing task {task['id']}...")
+```
+💡 **Use case:** Define custom execution logic for tasks in the queue.
+
+---
+
 ## ⚡ Enhancing Performance
-For large-scale applications, optimizing execution speed is crucial. 
+For large-scale applications, optimizing execution speed is crucial.
 
 ### 🔹 Example: Running Tasks in Parallel
 ```python
@@ -101,3 +129,4 @@ print(results)
 ---
 
 🚀 **Congratulations!** You've now explored the advanced capabilities of **Ethereal SDK**. Start building smarter AI agents today! 🎉
+
