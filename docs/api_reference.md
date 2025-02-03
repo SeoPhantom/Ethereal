@@ -1,4 +1,4 @@
-# 📖 Ethereal SDK API Reference
+# 📚 Ethereal SDK API Reference
 
 Welcome to the **Ethereal SDK API Reference**! This document provides an in-depth look at the core components and their functionalities within the SDK. 🛠️
 
@@ -6,24 +6,28 @@ Welcome to the **Ethereal SDK API Reference**! This document provides an in-dept
 
 ## 📌 Table of Contents
 1. [Core Modules](#core-modules)
-2. [Integrations](#integrations)
-3. [Utilities](#utilities)
-4. [Examples](#examples)
+2. [Task Management](#task-management)
+3. [Integrations](#integrations)
+4. [Utilities](#utilities)
+5. [Examples](#examples)
 
 ---
 
-## 🏗 Core Modules
+## 🏧 Core Modules
 These are the fundamental building blocks of **Ethereal SDK**.
 
 ### 🔹 `Agent`
 Manages AI-driven agents and their behaviors.
 ```python
 from openmeta.core.agent import Agent
-agent = Agent("EtherealAI", memory)
-agent.process_task("Analyze dataset")
+agent = Agent("EtherealAI")
+task = {"id": 1, "priority": 2, "task_type": "analysis"}
+agent.add_task(task)
+agent.process_tasks()
 ```
 💡 **Key Methods:**
-- `process_task(task: str) -> str`: Processes a task and stores it in memory.
+- `add_task(task: dict) -> None`: Adds a task to the agent's queue.
+- `process_tasks() -> None`: Processes all tasks in the queue.
 
 ### 🔹 `Memory`
 Handles agent memory operations.
@@ -46,6 +50,37 @@ workflow.execute()
 ```
 💡 **Key Methods:**
 - `execute() -> list`: Runs each step in sequence and returns results.
+
+---
+
+## 🛠 Task Management
+Efficiently handle and process tasks using priority queues.
+
+### 🔹 `TaskQueue`
+Manages and processes tasks in a priority-based queue.
+```python
+from openmeta.core.task_queue import TaskQueue
+task_queue = TaskQueue()
+
+task1 = {"id": 1, "priority": 2, "task_type": "analysis"}
+task2 = {"id": 2, "priority": 1, "task_type": "data_cleaning"}
+
+task_queue.add_to_queue(task1)
+task_queue.add_to_queue(task2)
+task_queue.process_queue()
+```
+💡 **Key Methods:**
+- `add_to_queue(task: dict) -> None`: Adds a task to the queue with priority handling.
+- `process_queue() -> None`: Processes all tasks in priority order.
+
+### 🔹 `Task Execution`
+Executes tasks from the queue.
+```python
+def execute_task(task: dict):
+    print(f"Executing task {task['id']}...")
+```
+💡 **Key Methods:**
+- `execute_task(task: dict) -> None`: Executes a given task.
 
 ---
 
@@ -77,7 +112,7 @@ print(blockchain.connect())
 ## ⚙ Utilities
 Helper functions for logging, validation, and debugging.
 
-### 📜 `Logger`
+### 📝 `Logger`
 Handles logging across modules.
 ```python
 from openmeta.utils.logging_utils import Logger
@@ -101,8 +136,8 @@ valid = Validator.validate_data({"key": "value"})
 ## 🎯 Examples
 Want to see **Ethereal SDK** in action? Check out the **[Example Scripts](../examples)** for practical implementations!
 
-📄 **Minimal Agent:** [View Code](../examples/minimal_agent.py)  
-🔁 **Workflow Demo:** [View Code](../examples/workflow_demo.py)  
+🗄 **Minimal Agent:** [View Code](../examples/minimal_agent.py)  
+🔄 **Workflow Demo:** [View Code](../examples/workflow_demo.py)  
 🌐 **Integration Example:** [View Code](../examples/integration_example.py)  
 
 📖 For advanced concepts, visit **[Advanced Usage](examples/advanced_usage.md)**.
@@ -110,3 +145,4 @@ Want to see **Ethereal SDK** in action? Check out the **[Example Scripts](../exa
 ---
 
 🚀 **Start building with Ethereal SDK today!** 🚀
+
