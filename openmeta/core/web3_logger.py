@@ -15,24 +15,36 @@ class Web3Logger:
         """Initialize Web3Logger with a blockchain connection."""
         self.blockchain_connector = BlockchainConnector(network, provider_url)
         self.web3 = Web3(Web3.HTTPProvider(self.blockchain_connector.provider_url))
+        if not self.web3.isConnected():
+            logging.error(f"Failed to connect to the blockchain at {provider_url}.")
+            raise ConnectionError("Blockchain is not connected.")
         logging.info(f"Web3Logger initialized for {network} network.")
 
     def log_to_blockchain(self, agent_id: str, action: str):
         """Log the agent action to the blockchain."""
         try:
-            if not self.web3.isConnected():
-                raise ConnectionError("Blockchain is not connected.")
+            if not agent_id:
+                raise ValueError("Agent ID is required.")
+            if not action:
+                raise ValueError("Action is required.")
 
             log_data = f"Agent {agent_id} performed action: {action}"
-            transaction = self.web3.eth.sendTransaction({
+
+            # Construct the transaction
+            transaction = {
                 'to': '0xYourContractAddress',  # Replace with contract address
                 'from': self.web3.eth.accounts[0],  # Use a proper wallet address
-                'data': log_data.encode('utf-8')
-            })
+                'data': self.web3.toHex(text=log_data)
+            }
 
-            logging.info(f"Log action sent to blockchain: {log_data}")
-            return transaction
+            # Send the transaction
+            tx_hash = self.web3.eth.sendTransaction(transaction)
+            logging.info(f"Log action sent to blockchain: {log_data} with TX hash: {tx_hash.hex()}")
+            return tx_hash
 
+        except ValueError as ve:
+            logging.error(f"Input validation error: {ve}")
+            raise
         except Exception as e:
             logging.error(f"Error logging action to blockchain: {e}")
             raise
@@ -40,6 +52,10 @@ class Web3Logger:
     def retrieve_log(self, agent_id: str) -> str:
         """Retrieve the agent's action logs from the blockchain."""
         try:
+            if not agent_id:
+                raise ValueError("Agent ID is required.")
+
+            # Retrieve logs filtered by agent_id
             logs = self.web3.eth.getLogs({
                 'fromBlock': 0,
                 'toBlock': 'latest',
@@ -48,14 +64,16 @@ class Web3Logger:
             })
 
             if logs:
-                log_data = logs[0]['data'].decode('utf-8')  # Assuming log data is stored in 'data'
+                log_data = self.web3.toText(logs[0]['data'])  # Decode log data from 'data'
                 logging.info(f"Retrieved log: {log_data}")
                 return log_data
             else:
                 logging.warning(f"No logs found for agent {agent_id}")
                 return "No logs found."
 
+        except ValueError as ve:
+            logging.error(f"Input validation error: {ve}")
+            raise
         except Exception as e:
             logging.error(f"Error retrieving logs from blockchain: {e}")
             raise
-
