@@ -10,7 +10,7 @@ Welcome to the **Advanced Usage** guide for Ethereal SDK! 🚀 This guide will h
 3. [Real-Time API Integrations](#real-time-api-integrations)
 4. [Task Queue and Execution](#task-queue-and-execution)
 5. [Enhancing Performance](#enhancing-performance)
-
+6. [Web3 Integration for Transparent Logging](#web3)
 ---
 
 ## 🧠 Customizing Agent Memory
@@ -127,6 +127,84 @@ print(results)
 💡 **Use case:** Run multiple agent processes in parallel to reduce execution time.
 
 ---
+## Web3 Integration for Transparent Logging
+
+With **Ethereal SDK v0.0.5**, you can now integrate **Web3** to log agent actions transparently on the blockchain. This integration helps in enhancing traceability and accountability, by storing agent actions on the blockchain in an immutable ledger. 
+
+### 🔹 Example: Setting Up Web3 Logging
+
+To use Web3 logging, you need to configure the `Web3Logger` class. Here's how you can initialize and use Web3 for logging agent actions:
+
+```python
+from openmeta.core.web3_logger import Web3Logger
+
+# Initialize Web3Logger with Ethereum network and provider URL
+web3_logger = Web3Logger(network="ethereum", provider_url="https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID")
+
+# Log an action to the blockchain
+agent_id = "agent_1"
+action = "perform_action"
+tx_hash = web3_logger.log_to_blockchain(agent_id, action)
+
+print(f"Transaction Hash: {tx_hash.hex()}")
+```
+
+💡 **Use case:** Log and trace actions of your agents on the blockchain to ensure complete transparency and accountability.
+
+---
+
+### 🔹 Example: Retrieving Logs from the Blockchain
+
+You can also retrieve logs from the blockchain to analyze the actions performed by agents. Here's an example of how to do that:
+
+```python
+# Retrieve logs for a specific agent from the blockchain
+agent_id = "agent_1"
+log_data = web3_logger.retrieve_log(agent_id)
+
+print(f"Retrieved log data: {log_data}")
+```
+
+💡 **Use case:** Retrieve agent logs to monitor actions or verify transactions on the blockchain.
+
+---
+
+### 🔹 Example: Enabling or Disabling Web3 Logging
+
+You can easily enable or disable Web3 logging by modifying the configuration in your settings:
+
+```python
+from openmeta.config.settings import Settings
+
+settings = Settings()
+
+# Enable Web3 logging
+settings.set("use_web3_logging", True)
+
+# Disable Web3 logging
+settings.set("use_web3_logging", False)
+```
+
+💡 **Use case:** Toggle Web3 logging based on different environments (e.g., enabling it in production for transparency and disabling in testing environments).
+
+---
+
+### 🔹 Example: Handling Web3 Errors and Failures
+
+Since blockchain transactions can sometimes fail or encounter errors (e.g., network issues, insufficient funds, etc.), it's important to handle these errors gracefully. Here's how you can catch and handle errors:
+
+```python
+try:
+    tx_hash = web3_logger.log_to_blockchain(agent_id, action)
+    print(f"Transaction Hash: {tx_hash.hex()}")
+except Exception as e:
+    print(f"Error logging action to blockchain: {e}")
+```
+
+💡 **Use case:** Ensure that your application can gracefully handle Web3-related errors and provide fallback mechanisms when necessary.
+
+---
+
 
 🚀 **Congratulations!** You've now explored the advanced capabilities of **Ethereal SDK**. Start building smarter AI agents today! 🎉
 
