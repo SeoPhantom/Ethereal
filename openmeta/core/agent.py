@@ -2,6 +2,7 @@ import logging
 from typing import Dict, Any
 from openmeta.core.agent_customization import AgentCustomization  # Import the customization class
 from openmeta.core.task_queue import TaskQueue, TaskQueueError  # Import your task queue system and custom error
+from openmeta.core.agent import handle_error, fallback_action  # Import error handler and fallback mechanism
 
 # Configure logging system
 logging.basicConfig(level=logging.INFO)
@@ -24,10 +25,13 @@ class Agent:
 
         except ValueError as e:
             logging.error(f"Task validation failed: {e}")
+            handle_error(e, self.name)  # Call error handler for ValueError
         except TaskQueueError as e:
             logging.error(f"Failed to add task to queue: {e}")
+            handle_error(e, self.name)  # Call error handler for TaskQueueError
         except Exception as e:
             logging.error(f"Unexpected error while adding task: {e}")
+            handle_error(e, self.name)  # Call error handler for generic errors
 
     def process_tasks(self):
         """Process tasks from the queue asynchronously."""
@@ -37,8 +41,12 @@ class Agent:
             logging.info("Task processing complete.")
         except TaskQueueError as e:
             logging.error(f"Error processing tasks: {e}")
+            handle_error(e, self.name)  # Call error handler for TaskQueueError
+            fallback_action(self.name)  # Trigger fallback action for this error
         except Exception as e:
             logging.error(f"Unexpected error during task processing: {e}")
+            handle_error(e, self.name)  # Call error handler for generic errors
+            fallback_action(self.name)  # Trigger fallback action for this error
 
     def _validate_task(self, task: Dict[str, Any]) -> bool:
         """Validate the structure and content of a task."""
